@@ -1,0 +1,49 @@
+from locust import HttpUser, TaskSet, task, between
+
+class UserBehavior(TaskSet):
+
+    def on_start(self):
+        self.client.get("/")
+
+    @task
+    def send_image_to_ml4(self):
+        url = "http://outside-prometheus-ml4:30080/post/"
+        files = {
+            'file-851': ('usecase.png', open('image/usecase.png', 'rb'), 'image/png')  # Updated file input field to 'file-851'
+        }
+        data = {
+            '_wpcf7': '13',  # Updated value
+            '_wpcf7_version': '5.9.8',
+            '_wpcf7_locale': 'ja',
+            '_wpcf7_unit_tag': 'wpcf7-f13-p9-o1',
+            '_wpcf7_container_post': '9',
+            '_wpcf7_posted_data_hash': ''  # Keep hash empty
+        }
+        # Send the image to the first URL
+        with open('image/usecase.png', 'rb') as f:
+            files['file-851'] = ('usecase.png', f, 'image/png')  # Ensure correct field is used
+            self.client.post(url, files=files, data=data)
+
+    @task
+    def send_image_to_mm1(self):
+        url = "http://outside-prometheus-mm1:30080/post/"
+        files = {
+            'file-996': ('usecase.png', open('image/usecase.png', 'rb'), 'image/png')  # Updated file input field to 'file-996'
+        }
+        data = {
+            '_wpcf7': '13',  # Updated value
+            '_wpcf7_version': '5.9.8',
+            '_wpcf7_locale': 'ja',
+            '_wpcf7_unit_tag': 'wpcf7-f13-p9-o1',
+            '_wpcf7_container_post': '9',
+            '_wpcf7_posted_data_hash': ''  # Keep hash empty
+        }
+        # Send the image to the second URL
+        with open('image/usecase.png', 'rb') as f:
+            files['file-996'] = ('usecase.png', f, 'image/png')  # Ensure correct field is used
+            self.client.post(url, files=files, data=data)
+
+class WebsiteUser(HttpUser):
+    tasks = [UserBehavior]
+    wait_time = between(1, 5)
+
